@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.vanniktech.publish)
-    id("org.jetbrains.dokka") version "2.0.0"
 }
 
 kotlin {
@@ -16,15 +15,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // TODO: Replace with published dependency when available
-            // implementation("tv.dpal:logging:<version>")
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization)
             implementation(compose.runtime)
-            implementation("org.jetbrains.compose.runtime:runtime-saveable:1.8.0")
-        }
-        androidMain.dependencies {
-            // no-op
+            implementation(compose.runtimeSaveable)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
@@ -40,11 +34,6 @@ android {
     composeOptions { kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get() }
 }
 
-// Generate HTML docs into libs/mvi/docs
-tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("mviDokkaHtml") {
-    outputDirectory.set(file("${project.projectDir}/docs"))
-}
-
 mavenPublishing {
     coordinates(
         groupId = "tv.dpal",
@@ -55,7 +44,7 @@ mavenPublishing {
     pom {
         name.set("FlowVi Core")
         description.set("MVI (Model-View-Intent) framework for Kotlin Multiplatform")
-        url.set("https://github.com/yourusername/flowvi")
+        url.set("https://github.com/dpaltv/flowvi")
 
         licenses {
             license {
@@ -66,16 +55,16 @@ mavenPublishing {
 
         developers {
             developer {
-                id.set("yourusername")
-                name.set("Your Name")
-                email.set("your.email@example.com")
+                id.set("eholtrop")
+                name.set("Evan Holtrop")
+                email.set("admin@dangeroustoplayalone.com")
             }
         }
 
         scm {
-            connection.set("scm:git:git://github.com/yourusername/flowvi.git")
-            developerConnection.set("scm:git:ssh://github.com/yourusername/flowvi.git")
-            url.set("https://github.com/yourusername/flowvi")
+            connection.set("scm:git:git://github.com/dpaltv/flowvi.git")
+            developerConnection.set("scm:git:ssh://github.com/dpaltv/flowvi.git")
+            url.set("https://github.com/dpaltv/flowvi")
         }
     }
 }
