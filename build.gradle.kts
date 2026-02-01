@@ -10,10 +10,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
 
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.vanniktech.publish) apply false
 }
 
+// Apply detekt to all sub projects
 subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
+
 
     dependencies {
         add("detektPlugins", "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
