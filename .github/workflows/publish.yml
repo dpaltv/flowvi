@@ -27,14 +27,14 @@ jobs:
         run: |
           CORE_VER=$(grep 'version = ' core/build.gradle.kts | head -n 1 | sed 's/.*version = "\(.*\)".*/\1/')
           COMPOSE_VER=$(grep 'version = ' compose/build.gradle.kts | head -n 1 | sed 's/.*version = "\(.*\)".*/\1/')
-          
+
           if [ "$CORE_VER" != "$COMPOSE_VER" ]; then
             echo "❌ ERROR: All modules must have the same version!"
             echo "core: $CORE_VER"
             echo "compose: $COMPOSE_VER"
             exit 1
           fi
-          
+
           echo "✅ All modules have version: $CORE_VER"
 
       - name: Get previous version from git tags
@@ -49,7 +49,7 @@ jobs:
         run: |
           CURRENT="${{ steps.get-version.outputs.version }}"
           PREVIOUS="${{ steps.get-previous.outputs.previous }}"
-          
+
           if [ "$CURRENT" = "$PREVIOUS" ]; then
             echo "❌ ERROR: Version has not been incremented!"
             echo "Current version: $CURRENT"
@@ -57,14 +57,14 @@ jobs:
             echo "Please increment the version in all module build.gradle.kts files before publishing."
             exit 1
           fi
-          
+
           echo "✅ Version check passed"
           echo "Previous: $PREVIOUS → Current: $CURRENT"
           echo "should-publish=true" >> $GITHUB_OUTPUT
 
   publish:
     needs: version-check
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     if: needs.version-check.outputs.should-publish == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -80,11 +80,16 @@ jobs:
 
       - name: Publish to Maven Central
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONARTYPE_MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONARTYPE_MAVEN_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSWORD }}
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+#        run: |
+#           Decode base64-encoded GPG key
+#          echo "$ORG_GRADLE_PROJECT_signingInMemoryKey" | base64 --decode > /tmp/gpg_key.asc
+#          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(cat /tmp/gpg_key.asc)
+#          ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
 
       - name: Create git tag
         run: |
@@ -101,23 +106,23 @@ jobs:
           name: Release ${{ needs.version-check.outputs.version }}
           body: |
             ## 📦 Maven Central
-            
+
             ### FlowVi Core
             ```gradle
             dependencies {
                 implementation("tv.dpal:flowvi-core:${{ needs.version-check.outputs.version }}")
             }
             ```
-            
+
             ### FlowVi Compose
             ```gradle
             dependencies {
                 implementation("tv.dpal:flowvi-compose:${{ needs.version-check.outputs.version }}")
             }
             ```
-            
+
             ## 📚 Documentation
-            
+
             See the [README](https://github.com/${{ github.repository }}) for usage examples and API documentation.
           draft: false
           prerelease: false

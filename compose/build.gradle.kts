@@ -36,6 +36,10 @@ android {
 }
 
 mavenPublishing {
+    publishToMavenCentral(
+        com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL
+    )
+    signAllPublications()
     coordinates(
         groupId = "tv.dpal",
         artifactId = "flowvi-compose",
