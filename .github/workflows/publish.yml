@@ -85,11 +85,6 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SECRET_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSWORD }}
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
-#        run: |
-#           Decode base64-encoded GPG key
-#          echo "$ORG_GRADLE_PROJECT_signingInMemoryKey" | base64 --decode > /tmp/gpg_key.asc
-#          export ORG_GRADLE_PROJECT_signingInMemoryKey=$(cat /tmp/gpg_key.asc)
-#          ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
 
       - name: Create git tag
         run: |
